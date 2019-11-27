@@ -7,6 +7,7 @@ namespace Cryptographie
         public ListeNombresPremiers()
         {
             InitializeComponent();
+            
         }
     }
 }
