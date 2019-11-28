@@ -1,17 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 using Cryptographie.Crypto;
-using Cryptographie.FormPerso;
 
 namespace Cryptographie
 {
     public partial class Form1 : Form
     {
+        private string cheminLogo;
+        private Bitmap image;
         private readonly Perso rsa;
         private readonly Net net;
-        ListeNombresPremiers fenetre;
         Dictionary<string, BordureTextBox> bordures;
         public Form1()
         {
@@ -20,7 +22,6 @@ namespace Cryptographie
             rsa = new Perso("a");
             net = new Net();
             
-            fenetre = new ListeNombresPremiers();
             bordures = new Dictionary<string, BordureTextBox>();
 
             AjouteForm();
@@ -31,55 +32,14 @@ namespace Cryptographie
             bDecrypteNet.Text = "Décryptage " + net.NomCryptage;
         }
 
-        private void bCryptePerso_Click(object sender, EventArgs e)
-        {
-            string clePublique = tCle.Text;
-            
-            if(clePublique.Length > 0)
-            {
-                rsa.SetCle(clePublique);
-                
-                string messageClair = tMessage.Text;
-                string messageChiffre = rsa.Chiffrer(messageClair);
-
-                tCrypte.Text = messageChiffre;
-            }
-            else
-            {
-                MessageBox.Show("Veuillez entrer une clé",
-                    "Erreur");
-            }
-        }
-
-        private void bDecryptePerso_Click(object sender, EventArgs e)
-        {
-            if (tCrypte.Text.Length > 0)
-            {
-                string messageChiffre = tCrypte.Text;
-                string messageClair = rsa.Dechiffrer(messageChiffre);
-
-                tDeCrypte.Text = messageClair;
-            }
-            else
-            {
-                MessageBox.Show("Texte crypté vide",
-                    "Erreur");
-            }
-        }
-        
-            /*ListView tableau = new ListView();
-            tableau.View = View.List;
-            tableau.GridLines = true;*/
-        private void bListeNombresPremiers_Click(object sender, EventArgs e)
-        {
-            DataGridView grille = new DataGridView();
-            
-            fenetre.Show();
-        }
-
         private void Form1_Load(object sender, EventArgs e)
         {
             BackColor = Color.FromArgb(44, 43, 60);
+            
+            cheminLogo = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + @"\crypt.png";
+            image = new Bitmap(cheminLogo);
+
+            pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
         }
 
         private void tMessage_Enter(object sender, EventArgs e)
@@ -161,6 +121,73 @@ namespace Cryptographie
         {
             bordures[tDeCrypte.Name].Etat = false;
             Invalidate();
+        }
+
+        private void bCrypterPerso_Click_1(object sender, EventArgs e)
+        {
+            string clePublique = tCle.Text;
+            
+            if(clePublique.Length > 0)
+            {
+                rsa.SetCle(clePublique);
+                
+                string messageClair = tMessage.Text;
+                string messageChiffre = rsa.Chiffrer(messageClair);
+
+                tCrypte.Text = messageChiffre;
+            }
+            else
+            {
+                MessageBox.Show("Veuillez entrer une clé",
+                    "Erreur");
+            }
+        }
+
+        private void bCrypterNet_Click(object sender, EventArgs e)
+        {
+            string cle = tCle.Text;
+            
+            if(cle.Length > 0)
+                tCrypte.Text = net.ProtectPassword(tMessage.Text, cle);
+            else
+            {
+                MessageBox.Show("Veuillez entrer une clé",
+                    "Erreur");
+            }
+        }
+
+        private void bDecryptePerso_Click(object sender, EventArgs e)
+        {
+            if (tCrypte.Text.Length > 0)
+            {
+                string messageChiffre = tCrypte.Text;
+                string messageClair = rsa.Dechiffrer(messageChiffre);
+
+                tDeCrypte.Text = messageClair;
+            }
+            else
+            {
+                MessageBox.Show("Texte crypté vide",
+                    "Erreur");
+            }
+        }
+
+        private void bDecrypteNet_Click_1(object sender, EventArgs e)
+        {
+            if (tCrypte.Text.Length > 0)
+            {
+                tDeCrypte.Text = net.UnprotectPassword(tCrypte.Text, tCle.Text);
+            }
+            else
+            {
+                MessageBox.Show("Texte crypté vide",
+                    "Erreur");
+            }
+        }
+
+        private void pictureBox1_Paint(object sender, PaintEventArgs e)
+        {
+            e.Graphics.DrawImage(image, new Rectangle(new Point(0,0), new Size(pictureBox1.Width, pictureBox1.Height)));
         }
     }
 }
