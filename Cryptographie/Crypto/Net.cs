@@ -1,8 +1,6 @@
 ﻿using System;
-using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using System.Security.Cryptography;
 
 namespace Cryptographie.Crypto
 {
@@ -14,10 +12,6 @@ namespace Cryptographie.Crypto
         
         public override string NomCryptage => nomCryptage;
 
-        public Net()
-        {
-        }
-        
         public string ProtectPassword(string clearPassword, string cle)
         {
             byte[] bytes = Encoding.UTF8.GetBytes(clearPassword);

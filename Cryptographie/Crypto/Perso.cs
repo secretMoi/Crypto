@@ -18,7 +18,7 @@ namespace Cryptographie.Crypto
 
         private new string nomCryptage = "RSA";
         
-        public Perso(string message, int cle = 463361)
+        public Perso(string message = null, int cle = 463361)
         {
             this.message = message;
             

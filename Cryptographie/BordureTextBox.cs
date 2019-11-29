@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using System.Drawing;
-using System.Windows.Forms;
+﻿using System.Drawing;
 
 namespace Cryptographie
 {
@@ -14,12 +12,9 @@ namespace Cryptographie
         private Color couleur;
         private static Color couleurActive = Color.FromArgb(102, 45, 145);
         private static Color couleurInactive = Color.FromArgb(51, 122, 183);
-
-        private TextBox textBox;
         
-        public BordureTextBox(TextBox textBox, Point position, Size taille)
+        public BordureTextBox(Point position, Size taille)
         {
-            this.textBox = textBox;
             this.position = position;
             this.taille = taille;
             this.couleur = couleurInactive;
@@ -54,16 +49,8 @@ namespace Cryptographie
 
         public Size Taille => taille;
 
-        public static Color CouleurActive
-        {
-            get => couleurActive;
-            set => couleurActive = value;
-        }
-        
-        public static Color CouleurInactive
-        {
-            get => couleurInactive;
-            set => couleurInactive = value;
-        }
+        public static Color CouleurActive => couleurActive;
+
+        public static Color CouleurInactive => couleurInactive;
     }
 }

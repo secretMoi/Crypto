@@ -14,29 +14,29 @@ namespace Cryptographie
         private Bitmap image;
         private readonly Perso rsa;
         private readonly Net net;
-        Dictionary<string, BordureTextBox> bordures;
+        readonly Dictionary<string, BordureTextBox> bordures;
         public Form1()
         {
             InitializeComponent();
 
-            rsa = new Perso("a");
+            rsa = new Perso();
             net = new Net();
             
             bordures = new Dictionary<string, BordureTextBox>();
 
             AjouteForm();
 
-            bCryptePerso.Text = "Cryptage " + rsa.NomCryptage;
-            bDecryptePerso.Text = "Décryptage " + rsa.NomCryptage;
-            bCrypterNet.Text = "Cryptage " + net.NomCryptage;
-            bDecrypteNet.Text = "Décryptage " + net.NomCryptage;
+            bCryptePerso.Text = @"Cryptage " + rsa.NomCryptage;
+            bDecryptePerso.Text = @"Décryptage " + rsa.NomCryptage;
+            bCrypterNet.Text = @"Cryptage " + net.NomCryptage;
+            bDecrypteNet.Text = @"Décryptage " + net.NomCryptage;
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
             BackColor = Color.FromArgb(44, 43, 60);
             
-            cheminLogo = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + @"\crypt.png";
+            cheminLogo = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule?.FileName) + @"\crypt.png";
             image = new Bitmap(cheminLogo);
 
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
@@ -63,16 +63,16 @@ namespace Cryptographie
                 else
                     bordureTextBox.Couleur = BordureTextBox.CouleurInactive;
                 
-                e.Graphics.DrawRectangle(bordureTextBox.Contour, new Rectangle(bordureTextBox.Position, bordureTextBox.Taille));
+                bordureTextBox.Dessine(e.Graphics);
             }
         }
 
         private void AjouteForm()
         {
-            bordures.Add(tMessage.Name, new BordureTextBox(tMessage, tMessage.Location, tMessage.Size));
-            bordures.Add(tCle.Name, new BordureTextBox(tCle, tCle.Location, tCle.Size));
-            bordures.Add(tCrypte.Name, new BordureTextBox(tCrypte, tCrypte.Location, tCrypte.Size));
-            bordures.Add(tDeCrypte.Name, new BordureTextBox(tDeCrypte, tDeCrypte.Location, tDeCrypte.Size));
+            bordures.Add(tMessage.Name, new BordureTextBox(tMessage.Location, tMessage.Size));
+            bordures.Add(tCle.Name, new BordureTextBox(tCle.Location, tCle.Size));
+            bordures.Add(tCrypte.Name, new BordureTextBox(tCrypte.Location, tCrypte.Size));
+            bordures.Add(tDeCrypte.Name, new BordureTextBox(tDeCrypte.Location, tDeCrypte.Size));
         }
 
         private List<BordureTextBox> ListeBordures()
@@ -125,22 +125,19 @@ namespace Cryptographie
 
         private void bCrypterPerso_Click_1(object sender, EventArgs e)
         {
-            string clePublique = tCle.Text;
+            if (tMessage.Text.Length < 1)
+            {
+                AfficheErreur("Veuillez entrer un texte à chiffrer");
+                return;
+            }
             
-            if(clePublique.Length > 0)
-            {
-                rsa.SetCle(clePublique);
+            if(tCle.Text.Length > 0)
+                rsa.SetCle(tCle.Text);
                 
-                string messageClair = tMessage.Text;
-                string messageChiffre = rsa.Chiffrer(messageClair);
+            string messageClair = tMessage.Text;
+            string messageChiffre = rsa.Chiffrer(messageClair);
 
-                tCrypte.Text = messageChiffre;
-            }
-            else
-            {
-                MessageBox.Show("Veuillez entrer une clé",
-                    "Erreur");
-            }
+            tCrypte.Text = messageChiffre;
         }
 
         private void bCrypterNet_Click(object sender, EventArgs e)
@@ -150,44 +147,47 @@ namespace Cryptographie
             if(cle.Length > 0)
                 tCrypte.Text = net.ProtectPassword(tMessage.Text, cle);
             else
-            {
-                MessageBox.Show("Veuillez entrer une clé",
-                    "Erreur");
-            }
+                AfficheErreur("Veuillez entrer une clé");
         }
 
         private void bDecryptePerso_Click(object sender, EventArgs e)
         {
-            if (tCrypte.Text.Length > 0)
+            if (tCrypte.Text.Length < 1)
             {
-                string messageChiffre = tCrypte.Text;
-                string messageClair = rsa.Dechiffrer(messageChiffre);
+                AfficheErreur("Texte crypté vide");
+                return;
+            }
+            
+            string messageChiffre = tCrypte.Text;
+            string messageClair = rsa.Dechiffrer(messageChiffre);
 
-                tDeCrypte.Text = messageClair;
-            }
-            else
-            {
-                MessageBox.Show("Texte crypté vide",
-                    "Erreur");
-            }
+            tDeCrypte.Text = messageClair;
         }
 
         private void bDecrypteNet_Click_1(object sender, EventArgs e)
         {
-            if (tCrypte.Text.Length > 0)
+            if (tCrypte.Text.Length < 1)
             {
-                tDeCrypte.Text = net.UnprotectPassword(tCrypte.Text, tCle.Text);
+                AfficheErreur("Texte crypté vide");
+                return;
             }
-            else
+            if (tCle.Text.Length < 1)
             {
-                MessageBox.Show("Texte crypté vide",
-                    "Erreur");
+                AfficheErreur("Clé vide");
+                return;
             }
+            
+            tDeCrypte.Text = net.UnprotectPassword(tCrypte.Text, tCle.Text);
         }
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
             e.Graphics.DrawImage(image, new Rectangle(new Point(0,0), new Size(pictureBox1.Width, pictureBox1.Height)));
+        }
+
+        private void AfficheErreur(string message)
+        {
+            MessageBox.Show(message, @"Erreur");
         }
     }
 }
